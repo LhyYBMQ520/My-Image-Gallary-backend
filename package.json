@@ -1,0 +1,30 @@
+{
+    "name": "my-image-gallary-back-end",
+    "version": "1.0.0",
+    "description": "",
+    "main": "index.js",
+    "scripts": {
+        "start": "tsx src/index.ts",
+        "ci:fmt": "biome format --write .",
+        "ci:lint": "biome lint .",
+        "ci:lint-fix": "biome lint --write .",
+        "ci:type-check": "tsc",
+        "fix": "pnpm run \"/^ci:fmt$|^ci:lint-fix$/\"",
+        "check": "pnpm run \"/^ci:type-check$|^ci:lint$/\""
+    },
+    "keywords": [],
+    "author": "",
+    "typs": "moudls",
+    "license": "MIT",
+    "devDependencies": {
+        "@biomejs/biome": "1.9.4",
+        "@types/express": "^5.0.0",
+        "@types/node": "^22.10.5",
+        "typescript": "^5.7.2"
+    },
+    "dependencies": {
+        "express": "^4.21.2",
+        "sharp": "^0.33.5",
+        "tsx": "^4.19.2"
+    }
+}
