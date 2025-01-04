@@ -1,85 +1,76 @@
 {
-  "type": "object",
-  "properties": {
-    "$schema": {
-      "type": "string"
-    },
-    "network": {
-      "type": "object",
-      "properties": {
-        "port": {
-          "type": "number",
-          "default": 3000
-        }
-      },
-      "additionalProperties": false
-    },
-    "app": {
-      "type": "object",
-      "properties": {
-        "image_folder": {
-          "type": "string"
+    "type": "object",
+    "properties": {
+        "$schema": {
+            "type": "string"
         },
-        "compressed_images_folder": {
-          "type": "string"
-        },
-        "log": {
-          "type": "object",
-          "properties": {
-            "file": {
-              "type": "string",
-              "default": ""
+        "network": {
+            "type": "object",
+            "properties": {
+                "port": {
+                    "type": "number",
+                    "default": 3000
+                }
             },
-            "level": {
-              "type": "number",
-              "default": 0
-            }
-          },
-          "additionalProperties": false,
-          "default": {}
-        }
-      },
-      "required": [
-        "image_folder",
-        "compressed_images_folder"
-      ],
-      "additionalProperties": false
-    },
-    "database": {
-      "allOf": [
-        {
-          "type": "object",
-          "properties": {
-            "client": {
-              "type": "string",
-              "enum": [
-                "pg",
-                "pg-native",
-                "sqlite3",
-                "better-sqlite3",
-                "mysql",
-                "mysql2",
-                "oracledb",
-                "tedious"
-              ]
-            }
-          },
-          "required": [
-            "client"
-          ]
+            "additionalProperties": false
         },
-        {
-          "type": "object",
-          "additionalProperties": {}
+        "app": {
+            "type": "object",
+            "properties": {
+                "image_folder": {
+                    "type": "string"
+                },
+                "compressed_images_folder": {
+                    "type": "string"
+                },
+                "log": {
+                    "type": "object",
+                    "properties": {
+                        "file": {
+                            "type": "string",
+                            "default": ""
+                        },
+                        "level": {
+                            "type": "number",
+                            "default": 0
+                        }
+                    },
+                    "additionalProperties": false,
+                    "default": {}
+                }
+            },
+            "required": ["image_folder", "compressed_images_folder"],
+            "additionalProperties": false
+        },
+        "database": {
+            "allOf": [
+                {
+                    "type": "object",
+                    "properties": {
+                        "client": {
+                            "type": "string",
+                            "enum": [
+                                "pg",
+                                "pg-native",
+                                "sqlite3",
+                                "better-sqlite3",
+                                "mysql",
+                                "mysql2",
+                                "oracledb",
+                                "tedious"
+                            ]
+                        }
+                    },
+                    "required": ["client"]
+                },
+                {
+                    "type": "object",
+                    "additionalProperties": {}
+                }
+            ]
         }
-      ]
-    }
-  },
-  "required": [
-    "network",
-    "app",
-    "database"
-  ],
-  "additionalProperties": false,
-  "$schema": "http://json-schema.org/draft-07/schema#"
+    },
+    "required": ["network", "app", "database"],
+    "additionalProperties": false,
+    "$schema": "http://json-schema.org/draft-07/schema#"
 }

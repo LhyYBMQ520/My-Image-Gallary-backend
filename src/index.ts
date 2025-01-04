@@ -13,23 +13,27 @@ const config = Config.parse(
 );
 
 const database = new Database(config.database);
-await database.init()
+await database.init();
 
-await findImages(config.app.image_folder,database);
+await findImages(config.app.image_folder, database);
 
 const app = express();
 
 app.use(morgen("dev"));
 
-app.get("/api/images",async (req, res) => {
-    const images = await database.getAllImages()
+app.get("/api/images", async (req, res) => {
+    const images = await database.getAllImages();
     const url = parseUrl(req);
     // todo need a better way to parse them
-    const page = Number.parseInt(url.searchParams.get("page") || "1") || 1
-    const perPage = Number.parseInt(url.searchParams.get("perPage") || "20") || 20;
+    const page = Number.parseInt(url.searchParams.get("page") || "1") || 1;
+    const perPage =
+        Number.parseInt(url.searchParams.get("perPage") || "20") || 20;
 
-    if (images.length < perPage) {res.json(images);return}
-    res.json(images.slice((page-1)*perPage,page*perPage))
+    if (images.length < perPage) {
+        res.json(images);
+        return;
+    }
+    res.json(images.slice((page - 1) * perPage, page * perPage));
 });
 
 app.listen(config.network.port, () => {
