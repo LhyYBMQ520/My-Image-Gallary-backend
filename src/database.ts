@@ -17,10 +17,10 @@ export class Database {
             });
         }
     }
-    async addImages(image:string){
-        return this.$("images").insert({name: image,has_compressed:false});   
+    async addImages(image: string) {
+        return this.$("images").insert({ name: image, has_compressed: false });
     }
-    async getAllImages(){
-        return this.$("images").select("id","name")
+    async getAllImages() {
+        return this.$("images").select("id", "name");
     }
 }

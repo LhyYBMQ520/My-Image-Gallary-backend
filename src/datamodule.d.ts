@@ -1,5 +1,5 @@
 // biome-ignore lint/correctness/noUnusedImports: This file is needed to let TypeScript make a correct infer.
-import { Knex } from 'knex';
+import { Knex } from "knex";
 
 interface Image {
     id: number;
