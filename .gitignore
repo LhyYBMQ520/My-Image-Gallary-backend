@@ -131,3 +131,6 @@ dist
 
 # vscode config
 .vscode/settings.json
+
+# the app it self
+.app
