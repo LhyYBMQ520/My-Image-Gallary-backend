@@ -2,6 +2,12 @@
 
 我的图片库仓库的后端部分
 
+<p align="center">
+  简体中文
+  ｜
+  <a href="../../README.md">English</a>
+</p>
+
 ## 使用方法
 
 ```bash
