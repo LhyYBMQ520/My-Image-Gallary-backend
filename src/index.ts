@@ -1,12 +1,12 @@
+import fs from "node:fs/promises";
+import path from "node:path";
 import express from "express";
 import morgen from "morgan";
-import { Config } from "./config";
 import toml from "smol-toml";
-import fs from "node:fs/promises";
-import { parseUrl } from "./unit";
+import { Config } from "./config";
 import { Database } from "./database";
 import { compressImage, findImages } from "./images";
-import path from "node:path";
+import { parseUrl } from "./unit";
 
 process.chdir(process.env.APP_HOME || ".app");
 const config = Config.parse(

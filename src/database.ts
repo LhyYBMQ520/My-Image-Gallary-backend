@@ -17,23 +17,21 @@ export class Database {
                 t.string("name").unique();
                 t.boolean("has_compressed");
                 t.boolean("is_gif");
-                t.binary("hash")
+                t.binary("hash");
             });
         }
     }
 
-    async addImages(image: Omit<Image,"id">) {
-        return this.$("images").insert(image)
+    async addImages(image: Omit<Image, "id">) {
+        return this.$("images").insert(image);
     }
 
-    async updateImages(image:Partial<Image>&Pick<Image,"id"> ) {
-        return this.$("images").where("id",image.id).update(image)
+    async updateImages(image: Partial<Image> & Pick<Image, "id">) {
+        return this.$("images").where("id", image.id).update(image);
     }
 
     async getAllImages() {
         // todo use the name of columns inside of *
-        return this.$("images").select(
-            "*"
-        );
+        return this.$("images").select("*");
     }
 }

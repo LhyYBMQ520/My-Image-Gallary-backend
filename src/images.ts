@@ -1,9 +1,9 @@
 import crypto from "node:crypto";
-import type { Database } from "./database";
+import type { Dirent } from "node:fs";
 import fs from "node:fs/promises";
 import path from "node:path";
-import type { Dirent } from "node:fs";
 import sharp from "sharp";
+import type { Database } from "./database";
 
 const dirent2str = (dirent: Dirent) =>
     path.join(dirent.parentPath, dirent.name);

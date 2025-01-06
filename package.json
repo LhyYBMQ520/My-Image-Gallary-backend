@@ -6,12 +6,14 @@
     "scripts": {
         "start": "tsx src/index.ts",
         "dev": "tsx watch src/index.ts",
-        "ci:fmt": "biome format --write .",
+        "ci:organize-imports": "biome check --formatter-enabled=false --linter-enabled=false --assists-enabled=false --write",
+        "ci:fmt": "biome check --linter-enabled=false --write .",
         "ci:lint": "biome lint .",
         "ci:lint-fix": "biome lint --write .",
         "ci:type-check": "tsc",
-        "fix": "pnpm run \"/^ci:fmt$|^ci:lint-fix$/\"",
-        "check": "pnpm run \"/^ci:type-check$|^ci:lint$/\"",
+        "ci:check": "biome check",
+        "fix": "biome check --write",
+        "check": "pnpm run \"/^ci:type-check$|^ci:check$/\"",
         "gen-config-schema": "tsx scripts/gen-config-schema.ts"
     },
     "keywords": [],
