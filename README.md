@@ -1,6 +1,12 @@
 # My-Image-Gallary-backend
 
-the backend of My-Image-Gallary.
+The backend of My-Image-Gallary.
+
+<p align="center">
+  <a href="/docs/zh-hans/readme.md">简体中文</a>
+  ｜
+  English
+</p>
 
 ## Usage
 
