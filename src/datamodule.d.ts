@@ -5,6 +5,8 @@ interface Image {
     id: number;
     name: string;
     has_compressed: boolean;
+    is_gif: boolean;
+    hash: Buffer;
 }
 
 declare module "knex/types/tables" {

@@ -21,7 +21,7 @@ export const configSchema = z.object({
     // maybe we can provide some just for schema file. This can help to provide a better config editing experience.
     database: z
         .object({
-            // the support list og knex.
+            // the support list of knex.
             client: z.enum([
                 "pg",
                 "pg-native",

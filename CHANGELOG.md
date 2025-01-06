@@ -10,3 +10,5 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - support image list api `/api/imges`.
+- support get image vai `/api/rawimage/:name` and `/api/compressed/:name`.
+- copress new image when app start.
