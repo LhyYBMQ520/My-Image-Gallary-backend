@@ -2,11 +2,22 @@ import crypto from "node:crypto";
 import type { Dirent } from "node:fs";
 import fs from "node:fs/promises";
 import path from "node:path";
+import type { FSWatcher } from "chokidar";
 import sharp from "sharp";
 import type { Database } from "./database";
 
 const dirent2str = (dirent: Dirent) =>
     path.join(dirent.parentPath, dirent.name);
+
+export const isImage = (path: string) =>
+    [".png", ".jpg", ".jpeg", ".gif", ".webp"].findIndex((suffixes) =>
+        path.endsWith(suffixes),
+    ) !== -1;
+
+const buf2hex = (buffer: Buffer) =>
+    [...new Uint8Array(buffer)]
+        .map((x) => x.toString(16).padStart(2, "0"))
+        .join("");
 
 /**
  * find new image
@@ -15,10 +26,6 @@ const dirent2str = (dirent: Dirent) =>
  * @returns the Promise of the database wirte task
  */
 export async function findImages(source: string, db: Database) {
-    const isImage = (path: string) =>
-        [".png", ".jpg", ".jpeg", ".gif", ".webp"].findIndex((suffixes) =>
-            path.endsWith(suffixes),
-        ) !== -1;
     const allImages = (await db.getAllImages()).sort((a, b) => a.id - b.id);
     const exists = allImages.map((i) => i.name);
 
@@ -31,9 +38,12 @@ export async function findImages(source: string, db: Database) {
                 return [i.name, hash.digest()] as const;
             }),
     );
+    const removed = exists.filter(
+        (i) => images.map((i) => i[0]).indexOf(i) === -1,
+    );
     // to find the image wich are not in the database, and get the key of the exists image
-    return Promise.all(
-        [...Map.groupBy(images, (i) => exists.indexOf(i[0]))].map(
+    return Promise.all([
+        ...[...Map.groupBy(images, (i) => exists.indexOf(i[0]))].map(
             async ([index, i]) => {
                 if (index >= 0) {
                     for (const [name, hash] of i) {
@@ -42,6 +52,7 @@ export async function findImages(source: string, db: Database) {
                             await db.updateImages({
                                 id: allImages[index].id,
                                 hash: hash,
+                                has_compressed: false,
                             });
                         }
                     }
@@ -62,10 +73,6 @@ export async function findImages(source: string, db: Database) {
                             hash: hash,
                         });
                     }
-                    const buf2hex = (buffer: Buffer) =>
-                        [...new Uint8Array(buffer)]
-                            .map((x) => x.toString(16).padStart(2, "0"))
-                            .join("");
 
                     for (const [name, hash] of checkedImage.get(false) ?? []) {
                         console.log(
@@ -75,7 +82,13 @@ export async function findImages(source: string, db: Database) {
                 }
             },
         ),
-    );
+        ...removed.map(async (removed) => {
+            await db.$("images").where("name", removed).delete();
+            console.warn(
+                `image ${removed} is not in ${source}. The record of id was removed from the database`,
+            );
+        }),
+    ]);
 }
 
 /**
@@ -86,13 +99,10 @@ export async function compressImage(
     target: string,
     db: Database,
 ) {
-    const isStiticImage = (path: string) =>
-        [".png", ".jpg", ".jpeg", ".webp"].findIndex((suffixes) =>
-            path.endsWith(suffixes),
-        ) !== -1;
-    const images = (await db.getAllImages())
-        .filter((i) => isStiticImage(i.name))
-        .filter((i) => !i.has_compressed);
+    const images = await db
+        .$("images")
+        .where("has_compressed", false)
+        .where("is_gif", false);
     const tasks = images.map(async (image) => {
         await sharp(path.join(source, image.name))
             .resize(300)
@@ -104,4 +114,56 @@ export async function compressImage(
             .update({ has_compressed: true });
     });
     return Promise.all(tasks);
+}
+
+export function startWatchImageDir(
+    watcher: FSWatcher,
+    source: string,
+    comperssedTo: string,
+    db: Database,
+) {
+    watcher.on("add", async (file) => {
+        const hash = crypto
+            .createHash("sha256")
+            .update(await fs.readFile(path.join(source, file)))
+            .digest();
+        const hashs = (await db.$("images").select("hash")).map((i) => i.hash);
+        if (hashs.findIndex((i) => i.equals(hash)) === -1) {
+            await db.addImages({
+                name: file,
+                has_compressed: false,
+                is_gif: file.endsWith(".gif"),
+                hash: hash,
+            });
+            console.log(`imagr add ${file}`);
+        } else {
+            console.log(`the hash of ${file}} [${buf2hex(hash)}] already exit`);
+        }
+        compressImage(source, comperssedTo, db);
+    });
+    watcher.on("unlink", async (file) => {
+        if ((await db.$("images").where("name", file)).length === 1) {
+            await db.$("images").where("name", file).delete();
+            console.warn(
+                `image ${file} is not in ${source}. The record of id was removed from the database`,
+            );
+        }
+    });
+    watcher.on("change", async (file) => {
+        const hash = crypto
+            .createHash("sha256")
+            .update(await fs.readFile(path.join(source, file)))
+            .digest();
+        const record = await db.$("images").where("name", file);
+        // I think the record[0] shuold have value, but I'm not sure of it
+        if (!record[0].hash.equals(hash)) {
+            console.log(`image ${file} has been changed`);
+            await db.updateImages({
+                id: record[0].id,
+                hash: hash,
+                has_compressed: false,
+            });
+        }
+        compressImage(source, comperssedTo, db);
+    });
 }

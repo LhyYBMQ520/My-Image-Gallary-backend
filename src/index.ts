@@ -5,13 +5,23 @@ import morgen from "morgan";
 import toml from "smol-toml";
 import { Config } from "./config";
 import { Database } from "./database";
-import { compressImage, findImages } from "./images";
+import { compressImage, findImages, startWatchImageDir } from "./images";
 import { parseUrl } from "./unit";
+
+import chokidar from "chokidar";
 
 process.chdir(process.env.APP_HOME || ".app");
 const config = Config.parse(
     toml.parse(await fs.readFile("./config.toml", { encoding: "utf-8" })),
 );
+// init here to prevent it call event add on exits file.
+// todo but we might can rebuild holl image tarking system on it
+const watcher = chokidar.watch("." /*config.app.image_folder*/, {
+    awaitWriteFinish: true,
+    usePolling: false,
+    cwd: config.app.image_folder,
+});
+
 console.time("database");
 const database = new Database(config.database);
 await database.init();
@@ -62,3 +72,10 @@ app.get("/api/compressed/:name", async (req, res) => {
 app.listen(config.network.port, () => {
     console.log(`Started server at: http://localhost:${config.network.port}`);
 });
+
+startWatchImageDir(
+    watcher,
+    config.app.image_folder,
+    config.app.compressed_images_folder,
+    database,
+);

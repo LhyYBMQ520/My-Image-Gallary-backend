@@ -30,6 +30,7 @@
     },
     "dependencies": {
         "@types/morgan": "^1.9.9",
+        "chokidar": "^4.0.3",
         "express": "^4.21.2",
         "knex": "^3.1.0",
         "morgan": "^1.10.0",
