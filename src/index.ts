@@ -5,7 +5,7 @@ import morgen from "morgan";
 import toml from "smol-toml";
 import { Config } from "./config";
 import { Database } from "./database";
-import { compressImage, findImages, startWatchImageDir } from "./images";
+import { compressImage, findImages, removeAllUselessCompressed, startWatchImageDir } from "./images";
 import { parseUrl } from "./unit";
 
 import chokidar from "chokidar";
@@ -28,6 +28,7 @@ await database.init();
 console.timeEnd("database");
 console.time("image");
 await findImages(config.app.image_folder, database);
+await removeAllUselessCompressed(config.app.compressed_images_folder,database)
 await compressImage(
     config.app.image_folder,
     config.app.compressed_images_folder,

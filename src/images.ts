@@ -116,6 +116,23 @@ export async function compressImage(
     return Promise.all(tasks);
 }
 
+export async function removeAllUselessCompressed(
+    comperssed: string,
+    db: Database,
+) {
+    const should = (await db.$("images").where("has_compressed", true)).map(
+        (i) => `${i.name}.webp`,
+    );
+    const exists = await fs.readdir(comperssed);
+    return Promise.all(
+        exists
+            .filter((i) => !should.includes(i))
+            .map((i) => {
+                return fs.rm(path.join(comperssed, i));
+            }),
+    );
+}
+
 export function startWatchImageDir(
     watcher: FSWatcher,
     source: string,
@@ -144,6 +161,7 @@ export function startWatchImageDir(
     watcher.on("unlink", async (file) => {
         if ((await db.$("images").where("name", file)).length === 1) {
             await db.$("images").where("name", file).delete();
+            await fs.rm(path.join(comperssedTo, `${file}.webp`));
             console.warn(
                 `image ${file} is not in ${source}. The record of id was removed from the database`,
             );
