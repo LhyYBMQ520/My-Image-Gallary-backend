@@ -5,7 +5,12 @@ import morgen from "morgan";
 import toml from "smol-toml";
 import { Config } from "./config";
 import { Database } from "./database";
-import { compressImage, findImages, removeAllUselessCompressed, startWatchImageDir } from "./images";
+import {
+    compressImage,
+    findImages,
+    removeAllUselessCompressed,
+    startWatchImageDir,
+} from "./images";
 import { parseUrl } from "./unit";
 
 import chokidar from "chokidar";
@@ -28,7 +33,7 @@ await database.init();
 console.timeEnd("database");
 console.time("image");
 await findImages(config.app.image_folder, database);
-await removeAllUselessCompressed(config.app.compressed_images_folder,database)
+await removeAllUselessCompressed(config.app.compressed_images_folder, database);
 await compressImage(
     config.app.image_folder,
     config.app.compressed_images_folder,
@@ -36,8 +41,24 @@ await compressImage(
 );
 console.timeEnd("image");
 const app = express();
+morgen.token("status-c", (req, res) => {
+    const status = res.statusCode;
 
-app.use(morgen("dev"));
+    // get status color
+    const color =
+        status >= 500
+            ? 31 // red
+            : status >= 400
+              ? 33 // yellow
+              : status >= 300
+                ? 36 // cyan
+                : status >= 200
+                  ? 32 // green
+                  : 0; // no color
+    return `\x1b[${color}m${status}\x1b[0m`;
+});
+
+app.use(morgen(":method [:date[iso]] :req[host] :url :status-c - :response-time ms"));
 
 app.get("/api/images", async (req, res) => {
     const images = await database.getAllImages();

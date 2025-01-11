@@ -24,12 +24,12 @@
         "@biomejs/biome": "1.9.4",
         "@types/express": "^5.0.0",
         "@types/node": "^22.10.5",
+        "@types/morgan": "^1.9.9",
         "better-sqlite3": "^11.7.0",
         "typescript": "^5.7.2",
         "zod-to-json-schema": "^3.24.1"
     },
     "dependencies": {
-        "@types/morgan": "^1.9.9",
         "chokidar": "^4.0.3",
         "express": "^4.21.2",
         "knex": "^3.1.0",
