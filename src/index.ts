@@ -14,6 +14,7 @@ import {
 import { parseUrl } from "./unit";
 
 import chokidar from "chokidar";
+import type { Image } from "./datamodule";
 
 process.chdir(process.env.APP_HOME || ".app");
 const config = Config.parse(
@@ -58,9 +59,13 @@ morgen.token("status-c", (req, res) => {
     return `\x1b[${color}m${status}\x1b[0m`;
 });
 
-app.use(morgen(":method [:date[iso]] :req[host] :url :status-c - :response-time ms"));
+// @ts-expect-error ip shoule be here
+morgen.token("ip",(req, res) => req.ip)
+
+app.use(morgen("[:date[iso]] :method :ip - :req[host] :url - :status-c :response-time ms"));
 
 app.get("/api/images", async (req, res) => {
+    const hash2base64 = (image:Image) => ({...image,hash:image.hash.toString("hex")});
     const images = await database.getAllImages();
     const url = parseUrl(req);
     // todo need a better way to parse them
@@ -69,10 +74,10 @@ app.get("/api/images", async (req, res) => {
         Number.parseInt(url.searchParams.get("perPage") as string) || 20;
 
     if (images.length < perPage) {
-        res.json(images);
+        res.json(images.map(hash2base64));
         return;
     }
-    res.json(images.slice((page - 1) * perPage, page * perPage));
+    res.json(images.slice((page - 1) * perPage, page * perPage).map(hash2base64));
 });
 
 app.get("/api/rawimage/:name", async (req, res) => {
